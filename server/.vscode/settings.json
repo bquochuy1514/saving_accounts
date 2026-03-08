@@ -1,0 +1,4 @@
+// .vscode/settings.json
+{
+  "eslint.rules.customizations": [{ "rule": "*", "severity": "off" }]
+}
