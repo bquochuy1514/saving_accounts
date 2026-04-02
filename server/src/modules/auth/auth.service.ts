@@ -35,7 +35,7 @@ export class AuthService {
 
     if (existingUser) {
       throw new BadRequestException(
-        'This email address already exists in the system. Please log in or choose a different email address.',
+        'Địa chỉ email đã tồn tại trong hệ thống! Vui lòng đăng nhập hoặc sử dụng địa chỉ email khác.',
       );
     }
 
@@ -58,7 +58,7 @@ export class AuthService {
     );
 
     if (!existingUser)
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException('Địa chỉ email hoặc mật khẩu không đúng');
 
     const isPasswordMatch = await comparePassword(
       loginDto.password,
@@ -66,7 +66,7 @@ export class AuthService {
     );
 
     if (!isPasswordMatch) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException('Địa chỉ email hoặc mật khẩu không đúng');
     }
 
     const { password, hashedRefreshToken, ...user } = existingUser;
