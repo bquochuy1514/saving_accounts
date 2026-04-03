@@ -1,119 +1,153 @@
-import Logo from "../../components/logo/Logo";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { LuPiggyBank, LuEye, LuEyeOff, LuLoader } from 'react-icons/lu';
+import { useAuth } from '../../contexts/UseAuth';
+import { toast } from 'react-toastify';
 
-// LoginPage.jsx
 export default function LoginPage() {
-  return (
-    <div className="min-h-screen flex">
-      {/* Cột trái */}
-      <div className="hidden md:flex flex-col justify-between flex-1 bg-[#1a1a2e] p-10">
-        <div className="flex items-center justify-center gap-2.5">
-          <Logo height={50} />
-        </div>
+	const { login } = useAuth();
+	const navigate = useNavigate();
 
-        <div>
-          <p className="text-white/85 text-lg font-light leading-relaxed mb-3">
-            "Thiết kế tốt không chỉ là cách nhìn — <br />
-            đó là cách mọi thứ hoạt động."
-          </p>
-          <p className="text-white/40 text-sm">— Steve Jobs</p>
-        </div>
+	const [form, setForm] = useState({ email: '', password: '' });
+	const [showPassword, setShowPassword] = useState(false);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState('');
+	const [fieldErrors, setFieldErrors] = useState({});
 
-        <div className="flex gap-1.5">
-          <div className="w-5 h-1.5 rounded-full bg-indigo-400" />
-          <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
-          <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
-        </div>
-      </div>
+	const handleChange = (e) => {
+		const { name, value } = e.target;
+		setForm((prev) => ({ ...prev, [name]: value }));
+		setFieldErrors((prev) => ({ ...prev, [name]: '' }));
+	};
 
-      {/* Cột phải */}
-      <div className="flex-1 flex items-center justify-center bg-white px-6 py-12">
-        <div className="w-full max-w-sm">
-          <h2 className="text-2xl font-semibold text-gray-900 tracking-tight mb-1">
-            Đăng nhập
-          </h2>
-          <p className="text-sm text-gray-400 mb-8">
-            Nhập thông tin để tiếp tục
-          </p>
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		try {
+			setLoading(true);
+			setError('');
+			setFieldErrors({});
+			const response = await login(form.email, form.password);
+			toast.success(response.message);
+			navigate('/tra-cuu');
+		} catch (err) {
+			if (err.fieldErrors) {
+				setFieldErrors(err.fieldErrors);
+			} else {
+				setError(err.message || 'Đăng nhập thất bại.');
+			}
+		} finally {
+			setLoading(false);
+		}
+	};
 
-          {/* Email */}
-          <div className="mb-4">
-            <label className="block text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1.5">
-              Email
-            </label>
-            <div className="relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="email"
-                placeholder="you@example.com"
-                className="w-full h-11 pl-9 pr-4 text-sm border border-gray-200 rounded-xl
-                  outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition"
-              />
-            </div>
-          </div>
+	return (
+		<div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+			<div className="w-full max-w-sm">
+				{/* Logo */}
+				<div className="flex flex-col items-center mb-8">
+					<div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center mb-3 shadow-sm">
+						<LuPiggyBank size={24} className="text-white" />
+					</div>
+					<h1 className="text-xl font-semibold text-gray-800">
+						Sổ Tiết Kiệm
+					</h1>
+					<p className="text-sm text-gray-400 mt-1">
+						Đăng nhập để tiếp tục
+					</p>
+				</div>
 
-          {/* Mật khẩu */}
-          <div className="mb-4">
-            <label className="block text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1.5">
-              Mật khẩu
-            </label>
-            <div className="relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="password"
-                placeholder="••••••••"
-                className="w-full h-11 pl-9 pr-10 text-sm border border-gray-200 rounded-xl
-                  outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition"
-              />
-              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                {/* eye icon */}
-              </button>
-            </div>
-          </div>
+				{/* Card */}
+				<div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+					<form onSubmit={handleSubmit} className="space-y-4">
+						{/* Email */}
+						<div>
+							<label className="block text-xs font-medium text-gray-600 mb-1.5">
+								Email
+							</label>
+							<input
+								type="text"
+								name="email"
+								value={form.email}
+								onChange={handleChange}
+								placeholder="example@sotietkiem.com"
+								autoComplete="email"
+								className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-colors placeholder:text-gray-300"
+							/>
+							{fieldErrors.email && (
+								<p className="text-xs text-red-500 mt-1">
+									{fieldErrors.email}
+								</p>
+							)}
+						</div>
 
-          {/* Remember + Forgot */}
-          <div className="flex items-center justify-between my-5">
-            <label className="flex items-center gap-2 text-sm text-gray-500 cursor-pointer">
-              <input
-                type="checkbox"
-                className="accent-indigo-500 w-3.5 h-3.5"
-              />
-              Ghi nhớ đăng nhập
-            </label>
-            <a href="#" className="text-sm text-indigo-500 hover:underline">
-              Quên mật khẩu?
-            </a>
-          </div>
+						{/* Password */}
+						<div>
+							<label className="block text-xs font-medium text-gray-600 mb-1.5">
+								Mật khẩu
+							</label>
+							<div className="relative">
+								<input
+									type={showPassword ? 'text' : 'password'}
+									name="password"
+									value={form.password}
+									onChange={handleChange}
+									placeholder="••••••••"
+									autoComplete="current-password"
+									className="w-full px-3 py-2.5 pr-10 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-colors placeholder:text-gray-300"
+								/>
+								<button
+									type="button"
+									onClick={() =>
+										setShowPassword((prev) => !prev)
+									}
+									className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+								>
+									{showPassword ? (
+										<LuEyeOff size={15} />
+									) : (
+										<LuEye size={15} />
+									)}
+								</button>
+							</div>
+							{fieldErrors.password && (
+								<p className="text-xs text-red-500 mt-1">
+									{fieldErrors.password}
+								</p>
+							)}
+						</div>
 
-          <button
-            className="w-full h-11 bg-indigo-500 hover:bg-indigo-600 text-white text-sm
-            font-medium rounded-xl transition"
-          >
-            Đăng nhập
-          </button>
+						{/* Error */}
+						{error && (
+							<div className="px-3 py-2.5 bg-red-50 border border-red-100 rounded-lg text-xs text-red-500">
+								{error}
+							</div>
+						)}
 
-          {/* Divider */}
-          <div className="flex items-center gap-3 my-4">
-            <div className="flex-1 h-px bg-gray-100" />
-            <span className="text-xs text-gray-400">hoặc</span>
-            <div className="flex-1 h-px bg-gray-100" />
-          </div>
+						{/* Submit */}
+						<button
+							type="submit"
+							disabled={loading}
+							className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors mt-2"
+						>
+							{loading ? (
+								<>
+									<LuLoader
+										size={14}
+										className="animate-spin"
+									/>
+									Đang đăng nhập...
+								</>
+							) : (
+								'Đăng nhập'
+							)}
+						</button>
+					</form>
+				</div>
 
-          <button
-            className="w-full h-11 border border-gray-200 rounded-xl text-sm text-gray-700
-            flex items-center justify-center gap-2 hover:bg-gray-50 transition"
-          >
-            {/* Google SVG */}
-            Tiếp tục với Google
-          </button>
-
-          <p className="text-center text-sm text-gray-400 mt-6">
-            Chưa có tài khoản?{" "}
-            <a href="#" className="text-indigo-500 font-medium hover:underline">
-              Đăng ký ngay
-            </a>
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+				<p className="text-center text-xs text-gray-400 mt-6">
+					Chưa có tài khoản? Liên hệ quản trị viên.
+				</p>
+			</div>
+		</div>
+	);
 }
