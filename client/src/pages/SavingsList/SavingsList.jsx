@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LuSearch, LuFilePlus, LuRefreshCw } from 'react-icons/lu';
-import api from '../../services/api';
 import PageHeader from '../../components/ui/PageHeader';
 import StatCard from '../../components/ui/StatCard';
+import Button from '../../components/ui/Button';
+import { getSavingsBooks } from '../../services/savings-book';
 
 const STATUS_LABEL = {
 	OPEN: {
@@ -33,14 +34,12 @@ export default function SavingsList() {
 	const [error, setError] = useState(null);
 
 	const [search, setSearch] = useState('');
-	const [filterStatus, setFilterStatus] = useState('ALL');
-	const [filterType, setFilterType] = useState('ALL');
 
 	const statCards = [
 		{ label: 'Tổng số sổ', value: books.length },
 		{
 			label: 'Đang hoạt động',
-			value: books.filter((b) => b.status === 'ACTIVE').length,
+			value: books.filter((b) => b.status === 'OPEN').length,
 			color: 'text-green-600',
 		},
 		{
@@ -59,14 +58,10 @@ export default function SavingsList() {
 		try {
 			setLoading(true);
 			setError(null);
-			const data = await api.get('/savings-book', {
-				headers: {
-					Authorization:
-						'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBzb3RpZXRraWVtLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3NTIwMTY1OSwiZXhwIjoxNzc1MjA1MjU5fQ.9BiZTVl4h-A0gzfECzeBWSN_W14mdiuaBmoWlKLupoI',
-				},
-			});
-			setBooks(data.data);
+			const response = await getSavingsBooks();
+			setBooks(response.data);
 		} catch (err) {
+			console.log(err);
 			setError('Không thể tải danh sách sổ tiết kiệm.');
 		} finally {
 			setLoading(false);
@@ -77,25 +72,14 @@ export default function SavingsList() {
 		fetchBooks();
 	}, []);
 
-	// Lấy danh sách loại tiết kiệm duy nhất để build filter
-	const savingsTypes = [
-		...new Map(
-			books.map((b) => [b.savingsType.id, b.savingsType]),
-		).values(),
-	];
-
 	const filtered = books.filter((book) => {
 		const keyword = search.toLowerCase();
-		const matchSearch =
+		return (
 			!keyword ||
 			book.customer.fullName.toLowerCase().includes(keyword) ||
 			book.customer.idNumber.includes(keyword) ||
-			String(book.id).includes(keyword);
-		const matchStatus =
-			filterStatus === 'ALL' || book.status === filterStatus;
-		const matchType =
-			filterType === 'ALL' || String(book.savingsType.id) === filterType;
-		return matchSearch && matchStatus && matchType;
+			String(book.id).includes(keyword)
+		);
 	});
 
 	return (
@@ -105,13 +89,12 @@ export default function SavingsList() {
 				title={'Tra cứu sổ tiết kiệm'}
 				subtitle={'Danh sách tất cả sổ tiết kiệm trong hệ thống'}
 				action={
-					<button
+					<Button
+						icon={<LuFilePlus size={15} />}
 						onClick={() => navigate('/mo-so')}
-						className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
 					>
-						<LuFilePlus size={15} />
 						Mở sổ mới
-					</button>
+					</Button>
 				}
 			/>
 
@@ -142,32 +125,9 @@ export default function SavingsList() {
 					/>
 				</div>
 
-				<select
-					value={filterStatus}
-					onChange={(e) => setFilterStatus(e.target.value)}
-					className="px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 text-gray-600"
-				>
-					<option value="ALL">Tất cả trạng thái</option>
-					<option value="ACTIVE">Đang hoạt động</option>
-					<option value="CLOSED">Đã đóng</option>
-				</select>
-
-				<select
-					value={filterType}
-					onChange={(e) => setFilterType(e.target.value)}
-					className="px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 text-gray-600"
-				>
-					<option value="ALL">Tất cả loại</option>
-					{savingsTypes.map((t) => (
-						<option key={t.id} value={String(t.id)}>
-							{t.name}
-						</option>
-					))}
-				</select>
-
 				<button
 					onClick={fetchBooks}
-					className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+					className="flex items-center gap-1.5 px-3 py-2 cursor-pointer text-sm text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
 				>
 					<LuRefreshCw size={14} />
 					Làm mới
@@ -241,7 +201,7 @@ export default function SavingsList() {
 											{index + 1}
 										</td>
 										<td className="px-4 py-3 font-medium text-gray-700">
-											#{book.id}
+											{book.bookCode}
 										</td>
 										<td className="px-4 py-3 text-gray-600">
 											{book.savingsType.name}
@@ -266,7 +226,7 @@ export default function SavingsList() {
 											</span>
 										</td>
 										<td className="px-4 py-3 text-gray-500 text-xs">
-											{book.openedByUser?.fullname ?? '—'}
+											{book.openedByUser?.fullName ?? '—'}
 										</td>
 										<td className="px-4 py-3">
 											<div className="flex items-center gap-3">

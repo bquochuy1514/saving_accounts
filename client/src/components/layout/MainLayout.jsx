@@ -9,6 +9,7 @@ import {
 	LuLogIn,
 	LuPiggyBank,
 	LuLogOut,
+	LuUsers,
 } from 'react-icons/lu';
 import { useAuth } from '../../contexts/UseAuth';
 import { toast } from 'react-toastify';
@@ -57,6 +58,19 @@ const navItems = [
 	},
 ];
 
+const adminNavItems = [
+	{
+		section: 'Quản trị',
+		items: [
+			{
+				label: 'Quản lý người dùng',
+				path: '/quan-ly-nguoi-dung',
+				icon: <LuUsers size={16} />,
+			},
+		],
+	},
+];
+
 const ROLE_LABEL = {
 	ADMIN: 'Quản trị viên',
 	MANAGER: 'Quản lý',
@@ -72,18 +86,49 @@ export default function MainLayout() {
 
 	const handleLogout = async () => {
 		const data = await logout();
-		toast.success(data.message);
+		toast.success(data?.message || 'Đã đăng xuất.');
 		navigate('/login');
 	};
 
-	const initials = user?.fullname
-		? user.fullname
+	const initials = user?.fullName
+		? user.fullName
 				.split(' ')
 				.slice(-2)
 				.map((w) => w[0])
 				.join('')
 				.toUpperCase()
 		: '?';
+
+	const renderNavGroup = (group) => (
+		<div key={group.section} className="mb-4">
+			<div className="text-[10px] uppercase tracking-widest text-gray-400 px-2 mb-1">
+				{group.section}
+			</div>
+			{group.items.map((item) => (
+				<button
+					key={item.path}
+					onClick={() => navigate(item.path)}
+					className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer text-sm mb-0.5 transition-colors duration-150 text-left
+						${
+							isActive(item.path)
+								? 'bg-blue-50 text-blue-700 font-medium'
+								: 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+						}`}
+				>
+					<span
+						className={
+							isActive(item.path)
+								? 'text-blue-600'
+								: 'text-gray-400'
+						}
+					>
+						{item.icon}
+					</span>
+					{item.label}
+				</button>
+			))}
+		</div>
+	);
 
 	return (
 		<div className="flex h-screen bg-gray-50 font-sans">
@@ -104,58 +149,28 @@ export default function MainLayout() {
 
 				{/* Nav */}
 				<nav className="flex-1 overflow-y-auto py-3 px-2">
-					{navItems.map((group) => (
-						<div key={group.section} className="mb-4">
-							<div className="text-[10px] uppercase tracking-widest text-gray-400 px-2 mb-1">
-								{group.section}
-							</div>
-							{group.items.map((item) => (
-								<button
-									key={item.path}
-									onClick={() => navigate(item.path)}
-									className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer text-sm mb-0.5 transition-colors duration-150 text-left
-										${
-											isActive(item.path)
-												? 'bg-blue-50 text-blue-700 font-medium'
-												: 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-										}`}
-								>
-									<span
-										className={
-											isActive(item.path)
-												? 'text-blue-600'
-												: 'text-gray-400'
-										}
-									>
-										{item.icon}
-									</span>
-									{item.label}
-								</button>
-							))}
-						</div>
-					))}
+					{navItems.map(renderNavGroup)}
+					{user?.role === 'ADMIN' &&
+						adminNavItems.map(renderNavGroup)}
 				</nav>
 
 				{/* Bottom */}
 				<div className="px-3 py-4 border-t border-gray-200">
 					{isAuthenticated ? (
 						<div className="flex flex-col gap-2">
-							{/* User info */}
 							<div className="flex items-center gap-2.5 px-1 py-1">
 								<div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-semibold flex-shrink-0">
 									{initials}
 								</div>
 								<div className="flex-1 min-w-0">
 									<div className="text-xs font-medium text-gray-800 truncate">
-										{user?.fullname}
+										{user?.fullName}
 									</div>
 									<div className="text-[10px] text-gray-400">
 										{ROLE_LABEL[user?.role] ?? user?.role}
 									</div>
 								</div>
 							</div>
-
-							{/* Logout button */}
 							<button
 								onClick={handleLogout}
 								className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-500 border border-gray-200 hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-colors duration-150 cursor-pointer"

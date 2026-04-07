@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { Prisma } from 'generated/prisma/client';
+import { createDeflate } from 'node:zlib';
+import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 
 @Injectable()
 export class UsersService {
@@ -36,5 +39,42 @@ export class UsersService {
     const { password, hashedRefreshToken, ...formatedUser } = user;
 
     return formatedUser;
+  }
+
+  async handleGetAllUsers() {
+    return await this.prisma.user.findMany({
+      omit: {
+        hashedRefreshToken: true,
+        password: true,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+  }
+
+  async handleChangeUserRole(updateUserRoleDto: UpdateUserRoleDto) {
+    const { role, userId } = updateUserRoleDto;
+    return await this.prisma.user.update({
+      where: { id: userId },
+      data: { role },
+      omit: { password: true, hashedRefreshToken: true },
+    });
+  }
+
+  async handleToggleLockUser(id: number) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    return await this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        isActive: !user.isActive,
+      },
+      omit: {
+        password: true,
+        hashedRefreshToken: true,
+      },
+    });
   }
 }

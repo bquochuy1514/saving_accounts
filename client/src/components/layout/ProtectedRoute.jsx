@@ -6,7 +6,6 @@ export default function ProtectedRoute() {
 
 	// Đang khởi tạo auth (đọc token từ localStorage) → chờ, không redirect vội
 	if (loading) {
-		console.log('loading: ', loading);
 		return (
 			<div className="flex h-screen items-center justify-center text-sm text-gray-400">
 				Đang tải...

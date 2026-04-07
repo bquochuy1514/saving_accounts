@@ -13,7 +13,7 @@ import { RefreshJwtStrategy } from './strategies/refresh.strategy';
   imports: [
     UsersModule,
     JwtModule.registerAsync({
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'), // Access environment variables
         signOptions: {
           expiresIn: configService.get<string>('JWT_EXPIRES_IN') as any, // Set expiration time dynamically

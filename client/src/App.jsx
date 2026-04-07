@@ -10,6 +10,7 @@ import ReportPage from './pages/Report/ReportPage';
 import RegulationsSettings from './pages/RegulationsSettings/RegulationsSettings';
 import { ToastContainer } from 'react-toastify';
 import ProtectedRoute from './components/layout/ProtectedRoute';
+import UserManagement from './pages/UserManagement/UserManagement';
 
 function App() {
 	return (
@@ -37,6 +38,10 @@ function App() {
 							<Route
 								path="quy-dinh"
 								element={<RegulationsSettings />}
+							/>
+							<Route
+								path="quan-ly-nguoi-dung"
+								element={<UserManagement />}
 							/>
 						</Route>
 					</Route>

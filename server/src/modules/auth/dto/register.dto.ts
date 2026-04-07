@@ -17,15 +17,15 @@ export class RegisterDto {
   email: string;
 
   @IsString({ message: 'Mật khẩu phải là chuỗi ký tự' })
-  @IsNotEmpty({ message: 'Mật khẩu không được để trống' })
   @MinLength(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' })
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
     message: 'Mật khẩu phải chứa ít nhất 1 chữ thường, 1 chữ hoa và 1 số',
   })
+  @IsNotEmpty({ message: 'Mật khẩu không được để trống' })
   password: string;
 
   @IsString({ message: 'Xác nhận mật khẩu phải là chuỗi ký tự' })
-  @IsNotEmpty({ message: 'Xác nhận mật khẩu không được để trống' })
   @Match('password', { message: 'Xác nhận mật khẩu không khớp' })
+  @IsNotEmpty({ message: 'Xác nhận mật khẩu không được để trống' })
   confirmPassword: string;
 }

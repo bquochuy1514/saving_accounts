@@ -13,6 +13,9 @@ import { RegisterDto } from './dto/register.dto';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { RefreshAuthGuard } from './guards/refresh-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RolesGuard } from './guards/roles.guard';
+import { Roles } from './decorators/roles.decorator';
+import { UserRole } from 'generated/prisma/enums';
 
 @Controller('auth')
 export class AuthController {
@@ -20,13 +23,15 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @ResponseMessage('Login successful!')
+  @ResponseMessage('Đăng nhập thành công!')
   login(@Body() loginDto: LoginDto) {
     return this.authService.handleLogin(loginDto);
   }
 
   @Post('register')
-  @ResponseMessage('Registration successful!')
+  @Roles(UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ResponseMessage('Đăng ký thành công!')
   register(@Body() registerDto: RegisterDto) {
     return this.authService.handleRegister(registerDto);
   }
@@ -39,6 +44,7 @@ export class AuthController {
   }
 
   @Post('logout')
+  @ResponseMessage('Đăng xuất thành công!')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   logout(@Req() req) {

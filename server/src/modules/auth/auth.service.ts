@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BadRequestException,
+  ForbiddenException,
   Inject,
   Injectable,
   UnauthorizedException,
@@ -16,7 +17,6 @@ import { JwtService } from '@nestjs/jwt';
 import refreshJwtConfig from './config/refresh-jwt.config';
 import type { ConfigType } from '@nestjs/config';
 import * as argon2 from 'argon2';
-import { JwtPayload } from 'src/common/types/types';
 
 @Injectable()
 export class AuthService {
@@ -45,7 +45,7 @@ export class AuthService {
     // 3. Create new user
     const newUser = await this.usersService.createUser({
       email: registerDto.email,
-      fullname: registerDto.fullName,
+      fullName: registerDto.fullName,
       password: hashedPassword,
     });
 
@@ -58,7 +58,7 @@ export class AuthService {
     );
 
     if (!existingUser)
-      throw new UnauthorizedException('Địa chỉ email hoặc mật khẩu không đúng');
+      throw new BadRequestException('Địa chỉ email hoặc mật khẩu không đúng');
 
     const isPasswordMatch = await comparePassword(
       loginDto.password,
@@ -66,7 +66,13 @@ export class AuthService {
     );
 
     if (!isPasswordMatch) {
-      throw new UnauthorizedException('Địa chỉ email hoặc mật khẩu không đúng');
+      throw new BadRequestException('Địa chỉ email hoặc mật khẩu không đúng');
+    }
+
+    if (!existingUser.isActive) {
+      throw new ForbiddenException(
+        'Tài khoản đã bị khoá. Vui lòng liên hệ quản trị viên.',
+      );
     }
 
     const { password, hashedRefreshToken, ...user } = existingUser;
@@ -92,7 +98,7 @@ export class AuthService {
     };
   }
 
-  async handleRefreshToken(user: JwtPayload) {
+  async handleRefreshToken(user: any) {
     const { access_token, refresh_token } = await this.generateTokens(user);
 
     const hashedRefreshToken = await argon2.hash(refresh_token);
@@ -109,7 +115,7 @@ export class AuthService {
     };
   }
 
-  async generateTokens(user: JwtPayload) {
+  async generateTokens(user: any) {
     const payload = { id: user.id, email: user.email, role: user.role };
     const [access_token, refresh_token] = await Promise.all([
       this.jwtService.signAsync(payload),
@@ -122,7 +128,7 @@ export class AuthService {
     };
   }
 
-  async validateRefreshToken(user: JwtPayload, refreshToken: string) {
+  async validateRefreshToken(user: any, refreshToken: string) {
     const userDB = await this.usersService.findUserByEmail(user.email);
     if (!userDB || !userDB.hashedRefreshToken)
       throw new UnauthorizedException('Invalid Refresh Token');
@@ -138,7 +144,7 @@ export class AuthService {
     return user;
   }
 
-  async handleLogout(user: JwtPayload) {
+  async handleLogout(user: any) {
     const userDB = await this.usersService.findUserByEmail(user.email);
     if (!userDB) throw new BadRequestException();
 

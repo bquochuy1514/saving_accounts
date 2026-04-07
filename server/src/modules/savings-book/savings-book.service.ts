@@ -48,12 +48,41 @@ export class SavingsBookService {
         `Số tiền gởi ban đầu tối thiểu là ${savingsType.minInitDeposit.toLocaleString('vi-VN')}đ`,
       );
 
+    const now = new Date();
+    const open = new Date(openDate);
+    const diffDays = (now.getTime() - open.getTime()) / (1000 * 60 * 60 * 24);
+
+    if (open > now) {
+      throw new BadRequestException('Ngày mở sổ không được là ngày tương lai');
+    }
+
+    if (diffDays > 7) {
+      throw new BadRequestException(
+        'Ngày mở sổ không được trước hôm nay quá 7 ngày',
+      );
+    }
+
     // 4. Tạo SavingsBook + Transaction INITIAL_DEPOSIT
     // Thực hiện đảm bảo tất cả các query bên trong phải thành công hết,
     // nếu 1 cái thất bại thì tất cả rollback (hoàn tác) lại.
     return this.prisma.$transaction(async (tx) => {
+      const year = new Date().getFullYear();
+      const count = await tx.savingsBook.count({
+        where: {
+          createdAt: {
+            gte: new Date(`${year}-01-01`), //lớn hơn hoặc bằng hơn 1/1/năm
+            lt: new Date(`${year + 1}-01-01`), //nhỏ hơn 1/1/năm+1
+          },
+        },
+      });
+
+      const bookCode = `STK-${year}-${String(count + 1).padStart(6, '0')}`;
+
+      console.log('Book code: ', bookCode);
+
       const savingsBookResult = await tx.savingsBook.create({
         data: {
+          bookCode,
           customerId,
           savingsTypeId,
           openDate: new Date(openDate),
