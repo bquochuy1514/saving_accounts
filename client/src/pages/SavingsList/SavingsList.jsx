@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LuSearch, LuFilePlus, LuRefreshCw } from 'react-icons/lu';
+import {
+	LuSearch,
+	LuFilePlus,
+	LuRefreshCw,
+	LuPiggyBank,
+	LuClipboardList,
+} from 'react-icons/lu';
 import PageHeader from '../../components/ui/PageHeader';
 import StatCard from '../../components/ui/StatCard';
 import Button from '../../components/ui/Button';
@@ -88,6 +94,8 @@ export default function SavingsList() {
 			<PageHeader
 				title={'Tra cứu sổ tiết kiệm'}
 				subtitle={'Danh sách tất cả sổ tiết kiệm trong hệ thống'}
+				icon={LuClipboardList}
+				badge={'BM4'}
 				action={
 					<Button
 						icon={<LuFilePlus size={15} />}

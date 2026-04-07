@@ -5,6 +5,7 @@ import {
 	LuRefreshCw,
 	LuPencil,
 	LuLock,
+	LuUserCog,
 } from 'react-icons/lu';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
@@ -154,6 +155,8 @@ export default function UserManagement() {
 			<PageHeader
 				title="Quản lý người dùng"
 				subtitle="Tạo và quản lý tài khoản nhân viên trong hệ thống"
+				icon={LuUserCog}
+				badge={'Authorization'}
 				action={
 					<Button
 						onClick={() => setShowModal(true)}
