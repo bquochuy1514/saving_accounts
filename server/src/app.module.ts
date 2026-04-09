@@ -9,6 +9,7 @@ import { SavingsTypeModule } from './modules/savings-type/savings-type.module';
 import { CustomersModule } from './modules/customers/customers.module';
 import { SavingsBookModule } from './modules/savings-book/savings-book.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
     CustomersModule,
     SavingsBookModule,
     TransactionsModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
