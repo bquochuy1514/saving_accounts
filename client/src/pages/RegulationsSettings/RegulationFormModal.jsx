@@ -8,9 +8,10 @@ import {
 	LuFileText,
 } from 'react-icons/lu';
 import { toast } from 'react-toastify';
-import api from '../../services/api';
+
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
+import { createSavingsType, updateSavingsType } from '../../services/savings-type';
 
 export default function RegulationFormModal({
 	isOpen,
@@ -119,10 +120,10 @@ export default function RegulationFormModal({
 
 			if (editingType) {
 				const typeId = editingType.id || editingType._id;
-				await api.put(`/savings-type/${typeId}`, payload);
+				await updateSavingsType(typeId, payload);
 				toast.success('Cập nhật cấu hình thành công!');
 			} else {
-				await api.post('/savings-type', payload);
+				await createSavingsType(payload);
 				toast.success('Thêm loại cấu hình mới thành công!');
 			}
 			onSuccess();
