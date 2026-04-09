@@ -314,10 +314,41 @@ export class SavingsBookService {
           'Không được truyền số tiền với loại sổ có kỳ hạn',
         );
 
-      const expectedDays = addMonths(openDate, termMonths);
-      if (withdrawalDate < expectedDays)
+      // Check ngày rút không được là tương lai
+      // if (withdrawalDate > new Date())
+      //   throw new BadRequestException(
+      //     'Ngày rút không thể là ngày trong tương lai',
+      //   );
+      // tạm thời comment để test
+
+      // Check ngày rút không được trước ngày mở sổ
+      if (withdrawalDate < openDate)
+        throw new BadRequestException('Ngày rút không thể trước ngày mở sổ');
+
+      // Tính số kỳ đủ dựa trên addMonths (đúng theo lịch thực tế)
+      let fullTerms = 0;
+      while (
+        addMonths(openDate, termMonths * (fullTerms + 1)) <= withdrawalDate
+      ) {
+        fullTerms++;
+      }
+
+      if (fullTerms < 1)
         throw new BadRequestException(
-          `Chỉ được rút khi đến kỳ hạn (${format(expectedDays, 'dd/MM/yyyy')}) của loại tiết kiệm ${termMonths} tháng`,
+          `Chỉ được rút khi đến kỳ hạn (${format(addMonths(openDate, termMonths), 'dd/MM/yyyy')}) của loại tiết kiệm ${termMonths} tháng`,
+        );
+
+      // Check gửi thêm cùng ngày rút
+      const sameDay = await this.prisma.transaction.findFirst({
+        where: {
+          savingsBookId,
+          type: TransactionType.DEPOSIT,
+          transactionDate: withdrawalDate,
+        },
+      });
+      if (sameDay)
+        throw new BadRequestException(
+          'Không thể rút tiền trong cùng ngày vừa gửi thêm',
         );
 
       const transactions = await this.prisma.transaction.findMany({
@@ -339,17 +370,29 @@ export class SavingsBookService {
       const noTermRate = noTermRateSavingsType.interestRate;
 
       const totalInterest = transactions.reduce((acc, tran) => {
-        // số ngày gửi
-        const daysHeld = differenceInDays(withdrawalDate, tran.transactionDate);
-        // ngày 1 kỳ
-        const termDays = termMonths * 30;
-        // số kỳ đủ
-        const fullTerms = Math.floor(daysHeld / termDays);
-        // ngày đủ kỳ
-        const fullDays = fullTerms * termDays;
-        // ngày lẻ
-        const remainDays = daysHeld - fullDays;
-        // lãi = lãi đủ kỳ + lãi lẻ
+        const depositDate = new Date(tran.transactionDate);
+
+        // Tính số kỳ đủ cho khoản gửi này (tính từ ngày gửi khoản đó)
+        let tranFullTerms = 0;
+        while (
+          addMonths(depositDate, termMonths * (tranFullTerms + 1)) <=
+          withdrawalDate
+        ) {
+          tranFullTerms++;
+        }
+
+        // Ngày đáo hạn kỳ cuối của khoản gửi này
+        const tranLastTermDate = addMonths(
+          depositDate,
+          termMonths * tranFullTerms,
+        );
+
+        // Số ngày đủ kỳ (tính theo ngày thực tế)
+        const fullDays = differenceInDays(tranLastTermDate, depositDate);
+
+        // Số ngày lẻ (từ ngày đáo hạn kỳ cuối đến ngày rút)
+        const remainDays = differenceInDays(withdrawalDate, tranLastTermDate);
+
         const interest =
           tran.amount *
             (savingsBook.savingsType.interestRate / 100) *
@@ -366,7 +409,7 @@ export class SavingsBookService {
               type: TransactionType.WITHDRAWAL,
               amount: savingsBook.balance,
               interest: totalInterest,
-              savingsBookId: savingsBookId,
+              savingsBookId,
               transactionDate: withdrawalDate,
               performedBy: user.id,
             },
@@ -383,9 +426,5 @@ export class SavingsBookService {
 
       return { transactionResult, savingsBookResult };
     }
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} savingsBook`;
   }
 }

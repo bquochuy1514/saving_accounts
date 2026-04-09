@@ -4,7 +4,6 @@ import {
   Post,
   Body,
   Param,
-  Delete,
   UseGuards,
   Req,
   ParseIntPipe,
@@ -67,10 +66,5 @@ export class SavingsBookController {
   @UseGuards(JwtAuthGuard)
   findOneSavingsBook(@Param('id', ParseIntPipe) id: number) {
     return this.savingsBookService.handleFineOneSavingsBook(id);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.savingsBookService.remove(+id);
   }
 }

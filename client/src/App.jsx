@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/Auth/LoginPage';
 import MainLayout from './components/layout/MainLayout';
-import RegisterPage from './pages/Auth/RegisterPage';
 import OpenSavingsBook from './pages/OpenBooks/OpenSavingsBook';
 import AdditionalDeposit from './pages/AdditionalDeposit/AdditionalDeposit';
 import SavingsList from './pages/SavingsList/SavingsList';
@@ -47,7 +46,6 @@ function App() {
 					</Route>
 
 					<Route path="/login" element={<LoginPage />} />
-					<Route path="/register" element={<RegisterPage />} />
 				</Routes>
 
 				<ToastContainer
