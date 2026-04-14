@@ -52,15 +52,15 @@ export class SavingsBookService {
     const open = new Date(openDate);
     const diffDays = (now.getTime() - open.getTime()) / (1000 * 60 * 60 * 24);
 
-    if (open > now) {
-      throw new BadRequestException('Ngày mở sổ không được là ngày tương lai');
-    }
+    // if (open > now) {
+    //   throw new BadRequestException('Ngày mở sổ không được là ngày tương lai');
+    // }
 
-    if (diffDays > 7) {
-      throw new BadRequestException(
-        'Ngày mở sổ không được trước hôm nay quá 7 ngày',
-      );
-    }
+    // if (diffDays > 7) {
+    //   throw new BadRequestException(
+    //     'Ngày mở sổ không được trước hôm nay quá 7 ngày',
+    //   );
+    // }
 
     // 4. Tạo SavingsBook + Transaction INITIAL_DEPOSIT
     // Thực hiện đảm bảo tất cả các query bên trong phải thành công hết,

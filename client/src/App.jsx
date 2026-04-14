@@ -5,11 +5,12 @@ import OpenSavingsBook from './pages/OpenBooks/OpenSavingsBook';
 import AdditionalDeposit from './pages/AdditionalDeposit/AdditionalDeposit';
 import SavingsList from './pages/SavingsList/SavingsList';
 import WithdrawalDeposit from './pages/WithdrawalDeposit/WithdrawalDeposit';
-import ReportPage from './pages/Report/ReportPage';
 import RegulationsSettings from './pages/RegulationsSettings/RegulationsSettings';
 import { ToastContainer } from 'react-toastify';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import UserManagement from './pages/UserManagement/UserManagement';
+import DailyActivityPage from './pages/Report/DailyActivityPage/DailyActivityPage';
+import MonthlyBooksPage from './pages/Report/MonthlyBooksPage/MonthlyBooksPage';
 
 function App() {
 	return (
@@ -33,7 +34,14 @@ function App() {
 								path="rut-tien"
 								element={<WithdrawalDeposit />}
 							/>
-							<Route path="bao-cao" element={<ReportPage />} />
+							<Route
+								path="bao-cao/doanh-so"
+								element={<DailyActivityPage />}
+							/>
+							<Route
+								path="bao-cao/mo-dong-so"
+								element={<MonthlyBooksPage />}
+							/>
 							<Route
 								path="quy-dinh"
 								element={<RegulationsSettings />}

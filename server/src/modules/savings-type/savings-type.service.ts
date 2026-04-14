@@ -28,11 +28,20 @@ export class SavingsTypeService {
   }
 
   handleFindAllSavingsType() {
-    return this.prisma.savingsType.findMany();
+    return this.prisma.savingsType.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
   }
 
   handleFindAllActiveSavingsType() {
-    return this.prisma.savingsType.findMany({ where: { isActive: true } });
+    return this.prisma.savingsType.findMany({
+      where: { isActive: true },
+      orderBy: {
+        name: 'asc',
+      },
+    });
   }
 
   async handleFindOneSavingsType(id: number) {

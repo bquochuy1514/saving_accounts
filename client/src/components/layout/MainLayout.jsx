@@ -10,6 +10,7 @@ import {
 	LuPiggyBank,
 	LuLogOut,
 	LuUsers,
+	LuBookOpen,
 } from 'react-icons/lu';
 import { useAuth } from '../../contexts/UseAuth';
 import { toast } from 'react-toastify';
@@ -40,9 +41,14 @@ const navItems = [
 		section: 'Báo cáo',
 		items: [
 			{
-				label: 'Báo cáo tháng',
-				path: '/bao-cao',
+				label: 'Doanh số hoạt động',
+				path: '/bao-cao/doanh-so',
 				icon: <LuChartBar size={16} />,
+			},
+			{
+				label: 'Mở/đóng sổ',
+				path: '/bao-cao/mo-dong-so',
+				icon: <LuBookOpen size={16} />,
 			},
 		],
 	},

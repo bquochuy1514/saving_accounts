@@ -1,7 +1,12 @@
 import api from './api';
 
-export const getSavingsTypes = async () => {
+export const getAllSavingsTypes = async () => {
 	const response = await api.get('/savings-type');
+	return response;
+};
+
+export const getActiveSavingsTypes = async () => {
+	const response = await api.get('/savings-type/active');
 	return response;
 };
 
